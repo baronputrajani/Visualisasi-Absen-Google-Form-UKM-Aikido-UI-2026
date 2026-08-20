@@ -7,8 +7,9 @@ Script otomatisasi Google Apps Script untuk merekap data kehadiran dari **Google
 ## Fitur Utama
 
 - **Otomatisasi Berbasis Trigger**: Dapat dijalankan secara manual atau otomatis melalui event `On Form Submit`.
-- **Penanganan Kolom Respon Dinamis (Kategori Member)**: Membaca nama responden secara langsung dari Kolom B (Nama)
+- **Penanganan Kolom Respon Dinamis (Kategori Member)**: Membaca nama responden secara langsung dari Kolom D (Warga UKM) atau Kolom E (Member Tenkei)
 - **Dynamic Date Matrix**: Membentuk kolom tanggal presensi bulanan secara otomatis khusus untuk hari latihan rutin (**Selasa, Kamis, Sabtu**).
+- **Generation system**: Rewrite/replace semua data pada bulan ini, sedangkan bulan sebelum-sebelumnya tidak disentuh.
 - **Format & Freeze Otomatis**: 
   - Kolom A ("Nama Responden") diatur pada ukuran *fixed* **175px**.
   - Kolom header di-*merge* secara vertikal untuk keterbacaan yang rapi.
@@ -48,7 +49,7 @@ dapat diubah diprogram
           ▼
 [ Script Membaca:
 Kolom A yang berisi timestamp dan 
-kolom B yang berisi nama ]
+kolom D dan E yang berisi nama ]
           │
           ▼
 [ Script Meng-generate Tab Bulan ini ] #tab akan selalu di-create dan recreate apabila ada nama bulan tersebut sudah ada di tab lain. bukan update, tapi recreate
@@ -63,14 +64,30 @@ kolom B yang berisi nama ]
 ---
  
 # Google Form
-Pertanyaan pada google form hanyalah dropdown list **NAMA**
+Pertanyaan pada google form:  
+1. Multiple choice: **kamu dari UKM / Tenkei?**  
+2. Multiple choice: **nama**  
+   2.1. apabila **jawabannya UKM**: (redirec)t Multiple choice **Nama Mahasiswa UKM**  
+   2.2. apabila **jawabannya Tenkei**: (redirect) Multiple choice **Nama Warga Tenkei**
+
+```text
+Kamu dari UKM / Tenkei? 
+├── UKM:  
+│   └── Multiple choice Nama Mahasiswa UKM  
+├── Tenkei:  
+│   └── Multiple choice Nama Warga Tenkei  
+└── Submit
+```
 
 
 ## Struktur Data Response Form
 ```text
-KOLOM       HEADER         KETERANGAN
-A           Timestamp      sebagai acuan tanggal absensi
-B           Nama           nama yang absen
+KOLOM       HEADER                  KETERANGAN
+A           Timestamp               sebagai acuan tanggal absensi
+B           Nama (obsolete)         tidak digunakan lagi
+C           UKM / Tenkei            jawaban untuk pertanyaan pertama dari UKM atau Tenkei
+D           Nama Warga UKM          nama warga ukm yang absen
+E           Nama Member Tenkei      nama warga tenkei yang absen
 ```
 
 ## Struktur Data Tab Bulanan

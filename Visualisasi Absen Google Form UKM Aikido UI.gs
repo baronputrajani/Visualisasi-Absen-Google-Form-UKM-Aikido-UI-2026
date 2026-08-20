@@ -1,4 +1,6 @@
-// (late commit) 26 juli 2026
+// (late commit) 7 Agustus 2026
+// sistemnya, dia bakal rewrite/replace semua data pada bulan ini. bulan sebelum-sebelumnya ga disentuh.
+// usahakan tabs "Form Responses 1" steril terutama nama dan tanggal, kecuali kebutuhan update sistem 
 function buatSheetBulanIniManual() {
   var today = new Date();
   generateSheetAbsensi(today.getMonth(), today.getFullYear());
@@ -6,10 +8,10 @@ function buatSheetBulanIniManual() {
 
 function generateSheetAbsensi(targetBulan, targetTahun) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var formSheet = ss.getSheetByName("Form Responses 1"); // Pastikan nama sheet respon tepat
+  var formSheet = ss.getSheetByName("JAWABAN FORM"); // nama tabs response gform
   
   if (!formSheet) {
-    Browser.msgBox("Sheet 'Form Responses 1' tidak ditemukan! Periksa nama tab Anda.");
+    Browser.msgBox("Sheet 'JAWABAN FORM' tidak ditemukan! cek nama tabnya.");
     return;
   }
 
@@ -18,7 +20,7 @@ function generateSheetAbsensi(targetBulan, targetTahun) {
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"
   ];
 
-  // Pemetaan Inisial Hari Inggris
+  // pemetaan inisial hari Eng
   var dayInitials = {
     2: "Tu",  // Tuesday
     4: "Th",  // Thursday
@@ -56,8 +58,12 @@ function generateSheetAbsensi(targetBulan, targetTahun) {
   var dataDitemukan = 0;
 
   for (var i = 1; i < data.length; i++) {
-    var rawTimestamp = data[i][0];
-    var nama = data[i][1];
+    var rawTimestamp = data[i][0]; // Kolom A: Timestamp
+    
+    // Evaluasi nama langsung di memori: Kolom D (indeks 3) atau Kolom E (indeks 4)
+    var namaD = data[i][3] ? data[i][3].toString().trim() : "";
+    var namaE = data[i][4] ? data[i][4].toString().trim() : "";
+    var nama = namaD || namaE; // Mengambil nama yang terisi
 
     if (!rawTimestamp || !nama) continue;
 
@@ -66,7 +72,6 @@ function generateSheetAbsensi(targetBulan, targetTahun) {
     if (!isNaN(timestamp.getTime())) {
       if (timestamp.getMonth() === targetBulan && timestamp.getFullYear() === targetTahun) {
         dataDitemukan++;
-        nama = nama.toString().trim();
         
         frequencyMap[nama] = (frequencyMap[nama] || 0) + 1;
         
@@ -185,7 +190,7 @@ function generateSheetAbsensi(targetBulan, targetTahun) {
   // F. Pengaturan Lebar Kolom (Fix 175 untuk Kolom A)
   sheetBaru.setColumnWidth(1, 175); // FIX 175 PX
   for (var k = 2; k < totalCols; k++) {
-    sheetBaru.setColumnWidth(k, 42); // Lebar ringkas untuk "Tu", "Th", "Sat"
+    sheetBaru.setColumnWidth(k, 42); // Lebar ringkas untuk tanggal ("Tu", "Th", "Sat")
   }
   sheetBaru.setColumnWidth(totalCols, 90); // Lebar pas untuk "Total Kehadiran"
 
@@ -254,14 +259,13 @@ function buatTabelRangkumanDanGrafik(sheet, sortedNama, breakdownHariMap, totalC
   var rangeGrafikHari = sheet.getRange(1, helperStartCol + 1, helperData.length + 2, 3);
 
   // D. Buat Grafik Batang Vertikal Berkelompok (Grouped Column Chart)
-  // Menentukan posisi baris grafik tepat di bawah tabel rangkuman (diberi jarak 2 baris)
   var chartRowPosition = helperData.length + 5;
 
   var chart = sheet.newChart()
     .setChartType(Charts.ChartType.COLUMN)
     .addRange(rangeGrafikNama)
     .addRange(rangeGrafikHari)
-    .setPosition(chartRowPosition, helperStartCol, 0, 0) // <--- Posisi diperbarui di sini
+    .setPosition(chartRowPosition, helperStartCol, 0, 0)
     .setOption('title', 'Rincian Kehadiran Per Hari (Selasa, Kamis, Sabtu)')
     .setOption('hAxis', {title: 'Nama Responden'})
     .setOption('vAxis', {
