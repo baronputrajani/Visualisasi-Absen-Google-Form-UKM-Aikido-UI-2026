@@ -60,18 +60,21 @@ kolom B yang berisi nama ]
 [ Nama, hari dan tanggal (selasa, kamis, sabtu), matriks kehadiran, total kehadiran, rangkuman, grafik batang vertikal ]
 ```
 
-# TEKNIS
-
-## Google Form
+---
+ 
+# Google Form
 Pertanyaan pada google form hanyalah dropdown list **NAMA**
 
 
 ## Struktur Data Response Form
-KOLOM       HEADER              KETERANGAN
-A           Timestamp           sebagai acuan tanggal absensi
-B           Nama                nama yang absen
+```text
+KOLOM       HEADER         KETERANGAN
+A           Timestamp      sebagai acuan tanggal absensi
+B           Nama           nama yang absen
+```
 
 ## Struktur Data Tab Bulanan
+```text
 KOLOM       HEADER              KETERANGAN
 A           Nama Responden      nama yang absen
 B-n         Hari, Tanggal       matriks kehadiran
@@ -81,3 +84,4 @@ n+3         Selasa              total kehadiran pada hari selasa
 n+4         Kamis               total kehadiran pada hari kamis
 n+5         Sabtu               total kehadiran pada hari sabtu
 n+6         Total kehadiran
+```
