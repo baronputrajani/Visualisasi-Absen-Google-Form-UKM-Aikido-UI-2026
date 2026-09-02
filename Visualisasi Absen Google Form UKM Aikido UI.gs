@@ -1,10 +1,11 @@
-// maap klo berantakan, masih pemula ~baron 7 Agustus 2026
+// Visualisasi Absen Gform V3.1 ~baron 2 september 2026
 // sistemnya, dia bakal rewrite/replace semua data pada bulan ini. bulan sebelum-sebelumnya ga disentuh.
 // usahakan tabs "Form Responses 1" steril terutama nama dan tanggal, kecuali kebutuhan update sistem 
 function buatSheetBulanIniManual() {
   var today = new Date();
   generateSheetAbsensi(today.getMonth(), today.getFullYear());
   buatSheetRangkumanTahun();
+  aturUrutanTab()
 }
 
 function generateSheetAbsensi(targetBulan, targetTahun) {
@@ -283,10 +284,11 @@ function buatTabelRangkumanDanGrafik(sheet, sortedNama, breakdownHariMap, totalC
   sheet.insertChart(chart);
 }
 
-// update 1 september
+// update 1 september 2026 (late commit jadi 2 september 2026)
 /**
- * Fungsi untuk membuat/mereplace tab "Rangkuman Kehadiran"
+ * Fungsi untuk membuat/mereplace tab "RANGKUMAN KEHADIRAN"
  * berdasarkan data dari tab-tab bulanan yang sudah dibuat.
+ * Dilengkapi dengan Total Kehadiran Kumulatif & Pengurutan Berdasarkan Kehadiran Terbanyak.
  */
 function buatSheetRangkumanTahun() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -332,9 +334,10 @@ function buatSheetRangkumanTahun() {
     return a.monthIdx - b.monthIdx;
   });
 
-  // 2. EKSTRAKSI DATA KEHADIRAN & DAFTAR RESPONDEN
+  // 2. EKSTRAKSI DATA KEHADIRAN & HITUNG TOTAL AKUMULASI TIAP MEMBER
   var respondentsSet = {};
-  var attendanceMatrix = {}; // Structure: { nama: { sheetName: totalKehadiran } }
+  var totalAttendanceMap = {}; // Structure: { nama: grandTotalCount }
+  var attendanceMatrix = {};    // Structure: { nama: { sheetName: totalKehadiranBulanIni } }
 
   for (var m = 0; m < monthlySheets.length; m++) {
     var mInfo = monthlySheets[m];
@@ -343,8 +346,7 @@ function buatSheetRangkumanTahun() {
 
     if (data.length < 3) continue; // Skip jika tidak ada data responden
 
-    // Kolom Total Kehadiran di tab bulanan selalu berada sebelum tabel helper rangkuman
-    // Kita cari indeks kolom "Total Kehadiran" dari baris 1 atau 2
+    // Cari indeks kolom "Total Kehadiran" di tab bulanan
     var totalColIdx = -1;
     for (var c = 0; c < data[0].length; c++) {
       var cellValHeader1 = data[0][c].toString().trim();
@@ -360,27 +362,35 @@ function buatSheetRangkumanTahun() {
     // Baca data responden mulai dari baris ke-3
     for (var r = 2; r < data.length; r++) {
       var nama = data[r][0] ? data[r][0].toString().trim() : "";
-      var totalHadir = data[r][totalColIdx];
+      var totalHadirBulanIni = Number(data[r][totalColIdx]) || 0;
 
       if (nama !== "") {
         respondentsSet[nama] = true;
         if (!attendanceMatrix[nama]) {
           attendanceMatrix[nama] = {};
         }
-        attendanceMatrix[nama][mInfo.name] = totalHadir !== "" ? totalHadir : 0;
+        attendanceMatrix[nama][mInfo.name] = totalHadirBulanIni;
+
+        // Akumulasi total kehadiran keseluruhan
+        totalAttendanceMap[nama] = (totalAttendanceMap[nama] || 0) + totalHadirBulanIni;
       }
     }
   }
 
-  var sortedRespondents = Object.keys(respondentsSet).sort();
+  var sortedRespondents = Object.keys(respondentsSet);
 
   if (sortedRespondents.length === 0) {
     Browser.msgBox("Tidak ada data responden yang valid pada tab bulanan.");
     return;
   }
 
-  // 3. BUAT / REPLACE TAB "Rangkuman Kehadiran"
-  var targetSheetName = "Rangkuman Kehadiran";
+  // URUTKAN RESPONDEN BERDASARKAN TOTAL KEHADIRAN TERBANYAK
+  sortedRespondents.sort(function(a, b) {
+    return totalAttendanceMap[b] - totalAttendanceMap[a];
+  });
+
+  // 3. BUAT / REPLACE TAB "RANGKUMAN KEHADIRAN"
+  var targetSheetName = "RANGKUMAN KEHADIRAN";
   var rangkumanSheet = ss.getSheetByName(targetSheetName);
   if (rangkumanSheet) {
     ss.deleteSheet(rangkumanSheet);
@@ -396,9 +406,13 @@ function buatSheetRangkumanTahun() {
     headerRow2.push(monthlySheets[k].monthName);
   }
 
+  // Tambahkan Kolom "Total Kehadiran" di Paling Kanan Header
+  headerRow1.push("Total Kehadiran");
+  headerRow2.push("");
+
   var totalCols = headerRow1.length;
 
-  // Tulis Header
+  // Tulis Header Ke Sheet
   rangkumanSheet.getRange(1, 1, 1, totalCols).setValues([headerRow1]);
   rangkumanSheet.getRange(2, 1, 1, totalCols).setValues([headerRow2]);
 
@@ -411,8 +425,17 @@ function buatSheetRangkumanTahun() {
            .setHorizontalAlignment("left")
            .setVerticalAlignment("middle");
 
-  // Format Header Bulan & Tahun (Kolom B dan seterusnya)
-  var rangeHeaderMonths = rangkumanSheet.getRange(2, 2, 1, totalCols - 1);
+  // Merge Kolom Terakhir (Total Kehadiran)
+  var rangeTotalHeader = rangkumanSheet.getRange(1, totalCols, 2, 1);
+  rangeTotalHeader.merge()
+                  .setValue("Total Kehadiran")
+                  .setFontWeight("bold")
+                  .setBackground("#a4c2f4")
+                  .setHorizontalAlignment("center")
+                  .setVerticalAlignment("middle");
+
+  // Format Header Bulan (Baris 2)
+  var rangeHeaderMonths = rangkumanSheet.getRange(2, 2, 1, totalCols - 2);
   rangeHeaderMonths.setFontWeight("bold")
                    .setBackground("#d9ead3")
                    .setHorizontalAlignment("center")
@@ -420,11 +443,11 @@ function buatSheetRangkumanTahun() {
 
   // Merge Baris 1 untuk Tahun yang Sama
   var startCol = 2;
-  while (startCol <= totalCols) {
+  while (startCol < totalCols) {
     var currentYear = rangkumanSheet.getRange(1, startCol).getValue();
     var endCol = startCol;
 
-    while (endCol + 1 <= totalCols && rangkumanSheet.getRange(1, endCol + 1).getValue() == currentYear) {
+    while (endCol + 1 < totalCols && rangkumanSheet.getRange(1, endCol + 1).getValue() == currentYear) {
       endCol++;
     }
 
@@ -433,14 +456,14 @@ function buatSheetRangkumanTahun() {
       rangeYear.merge();
     }
     rangeYear.setFontWeight("bold")
-             .setBackground("#a4c2f4")
+             .setBackground("#b6d7a8")
              .setHorizontalAlignment("center")
              .setVerticalAlignment("middle");
 
     startCol = endCol + 1;
   }
 
-  // 5. ISI DATA UTAMA (Mulai Baris 3)
+  // 5. ISI DATA UTAMA & TOTAL KEHADIRAN (Mulai Baris 3)
   var matrixOutput = [];
   for (var i = 0; i < sortedRespondents.length; i++) {
     var resNama = sortedRespondents[i];
@@ -451,6 +474,9 @@ function buatSheetRangkumanTahun() {
       var count = attendanceMatrix[resNama][sName];
       row.push(count !== undefined ? count : 0);
     }
+
+    // Masukkan Total Kehadiran Kumulatif ke Kolom Terakhir
+    row.push(totalAttendanceMap[resNama] || 0);
     matrixOutput.push(row);
   }
 
@@ -460,15 +486,20 @@ function buatSheetRangkumanTahun() {
   dataRange.setValues(matrixOutput);
 
   // 6. FORMATTING & LAYOUT TABEL
-  // Format rata tengah untuk angka kehadiran
+  // Alignment angka kehadiran (Rata Tengah)
   rangkumanSheet.getRange(startRow, 2, totalRows, totalCols - 1)
                 .setHorizontalAlignment("center")
                 .setVerticalAlignment("middle");
 
-  // Format rata kiri untuk nama responden
+  // Alignment Nama (Rata Kiri)
   rangkumanSheet.getRange(startRow, 1, totalRows, 1)
                 .setHorizontalAlignment("left")
                 .setVerticalAlignment("middle");
+
+  // Highlight Background Kolom Total Kehadiran Terakhir (#a4c2f4)
+  rangkumanSheet.getRange(startRow, totalCols, totalRows, 1)
+                .setBackground("#a4c2f4")
+                .setFontWeight("bold");
 
   // Border seluruh tabel
   var fullTableRange = rangkumanSheet.getRange(1, 1, totalRows + 2, totalCols);
@@ -481,9 +512,99 @@ function buatSheetRangkumanTahun() {
 
   // Lebar Kolom
   rangkumanSheet.setColumnWidth(1, 175); // Kolom Nama Responden
-  for (var cIdx = 2; cIdx <= totalCols; cIdx++) {
+  for (var cIdx = 2; cIdx < totalCols; cIdx++) {
     rangkumanSheet.setColumnWidth(cIdx, 100); // Lebar Kolom Bulan
   }
+  rangkumanSheet.setColumnWidth(totalCols, 110); // Lebar Kolom Total Kehadiran
 
-  Browser.msgBox("Tab 'Rangkuman Kehadiran' berhasil diperbarui!");
+  Browser.msgBox("Tab 'RANGKUMAN KEHADIRAN' berhasil diperbarui!");
+}
+
+
+// update 2 september 2026
+/**
+ * Memindahkan dan mengurutkan posisi tab di Google Spreadsheet sesuai urutan:
+ * 1. "JAWABAN FORM" (Paling Kiri)
+ * 2. "RANGKUMAN KEHADIRAN"
+ * 3. Tab Bulanan secara Terbalik (Bulan Terbaru -> Bulan Terlama)
+ */
+function aturUrutanTab() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var allSheets = ss.getSheets();
+
+  var monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  var targetFormSheetName = "JAWABAN FORM";
+  var targetRangkumanName = "RANGKUMAN KEHADIRAN";
+
+  var monthlySheets = [];
+  var otherSheets = [];
+
+  // 1. KELOMPOKKAN & IDENTIFIKASI SELURUH TAB
+  for (var i = 0; i < allSheets.length; i++) {
+    var sheet = allSheets[i];
+    var sName = sheet.getName();
+
+    var parts = sName.split(" ");
+    if (parts.length === 2) {
+      var monthIdx = monthNames.indexOf(parts[0]);
+      var yearNum = parseInt(parts[1], 10);
+
+      if (monthIdx !== -1 && !isNaN(yearNum)) {
+        monthlySheets.push({
+          sheet: sheet,
+          name: sName,
+          monthIdx: monthIdx,
+          year: yearNum
+        });
+        continue;
+      }
+    }
+
+    if (sName !== targetFormSheetName && sName !== targetRangkumanName) {
+      otherSheets.push(sheet);
+    }
+  }
+
+  // 2. URUTKAN TAB BULANAN SECARA TERBALIK (Terbaru -> Terlama)
+  monthlySheets.sort(function(a, b) {
+    if (a.year !== b.year) return b.year - a.year; // Tahun terbesar di awal
+    return b.monthIdx - a.monthIdx;               // Bulan terbesar di awal
+  });
+
+  // 3. SUSUN DERETAN TARGET URUTAN TAB
+  var orderedSheets = [];
+
+  // Posisi 1: Tab Respon Form
+  var formSheet = ss.getSheetByName(targetFormSheetName);
+  if (formSheet) orderedSheets.push(formSheet);
+
+  // Posisi 2: Tab RANGKUMAN KEHADIRAN
+  var rangkumanSheet = ss.getSheetByName(targetRangkumanName);
+  if (rangkumanSheet) orderedSheets.push(rangkumanSheet);
+
+  // Posisi 3 Dst: Tab Bulan Terbaru s/d Terlama
+  for (var m = 0; m < monthlySheets.length; m++) {
+    orderedSheets.push(monthlySheets[m].sheet);
+  }
+
+  // Masukkan sisanya (jika ada tab tambahan lain)
+  for (var o = 0; o < otherSheets.length; o++) {
+    orderedSheets.push(otherSheets[o]);
+  }
+
+  // 4. EKSEKUSI PEMINDAHAN POSISI TAB SECARA AMAN
+  for (var pos = 0; pos < orderedSheets.length; pos++) {
+    var targetSheet = orderedSheets[pos];
+    
+    // Pastikan sheet valid sebelum dipindahkan
+    if (targetSheet) {
+      ss.setActiveSheet(targetSheet);
+      // Pindahkan ke posisi pos + 1 (1-indexed)
+      ss.moveActiveSheet(pos + 1);
+    }
+  }
 }
