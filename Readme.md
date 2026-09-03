@@ -84,11 +84,11 @@ Script Memindai Seluruh Tab Bulanan & Menghasilkan Tab "Rangkuman Kehadiran"
 ### Ringkasan Function Utama program
 | Nama Function | Deskripsi |
 | -------- | -------- |
-| `buatSheetBulanIniManual()`   | desc 2   |
-| `generateSheetAbsensi(targetBulan, targetTahun)`   | desc 5   |
-| `buatTabelRangkumanDanGrafik(...)` | desc |
-| `buatSheetRangkumanTahun()` | desc |
-| `aturUrutanTab()` | desc |
+| `buatSheetBulanIniManual()`   | Main runner untuk memanggil fungsi lain|
+| `generateSheetAbsensi(targetBulan, targetTahun)`   | Membaca data dari `JAWABAN FORM`, membentuk matriks presensi bulanan (Selasa, Kamis, Sabtu), mengurutkan responden berdasarkan kehadiran, dan mengaplikasikan styling/formatting sheet   |
+| `buatTabelRangkumanDanGrafik(...)` | Membuat tabel helper rincian presensi per hari latihan di samping matriks utama dan membangkitkan Grouped Column Chart di bawahnya |
+| `buatSheetRangkumanTahun()` | Mengompilasi seluruh tab bulanan yang ada menjadi satu matriks akumulatif pada tab `RANGKUMAN KEHADIRAN` dengan pengelompokan per tahun. |
+| `aturUrutanTab()` | Menyusun tata letak seluruh sheet secara konsisten dari kiri ke kanan: `JAWABAN FORM` ➔ `RANGKUMAN KEHADIRAN` ➔ `Tab Bulanan (Terbaru ke Terlama)`. |
 
 ---
  
@@ -112,14 +112,13 @@ Kamu dari UKM / Tenkei?
 
 # Struktur Data
 ## Struktur Data Response Form (`Form Responses 1`)
-```text
-KOLOM       HEADER                  KETERANGAN
-A           Timestamp               Acuan tanggal, bulan, dan tahun absensi
-B           Nama (obsolete)         tidak digunakan lagi
-C           UKM / Tenkei            jawaban untuk pertanyaan pertama dari UKM atau Tenkei
-D           Nama Warga UKM          nama warga ukm yang absen
-E           Nama Member Tenkei      nama warga tenkei yang absen
-```
+| Kolom | Header | Keterangan |
+| :---: | :--- | :--- |
+| **A** | Timestamp | Acuan tanggal, bulan, dan tahun absensi. |
+| **B** | Nama *(obsolete)* | Tidak digunakan lagi. |
+| **C** | UKM / Tenkei | Jawaban untuk pertanyaan pertama dari UKM atau Tenkei. |
+| **D** | Nama Warga UKM | Nama warga UKM yang absen. |
+| **E** | Nama Member Tenkei | Nama warga Tenkei yang absen. |
 
 ## Struktur Data Tab Bulanan
 ```text
@@ -221,8 +220,9 @@ n+1         Total Kehadiran     total kehadiran akumulatif anggota
 
 
 
-
+ 
   TODO:
   - benerin ringkasan fungsi utama program
   - commit tanggal 3
   - ubah plain text format jadi tabel
+  - bikin fitur sort biar tinggal klik aja
