@@ -83,7 +83,7 @@ Script Memindai Seluruh Tab Bulanan & Menghasilkan Tab "Rangkuman Kehadiran"
 ```
 ### Ringkasan Function Utama program
 | Nama Function | Deskripsi |
-| -------- | -------- |
+| --- | --- |
 | `buatSheetBulanIniManual()`   | Main runner untuk memanggil fungsi lain|
 | `generateSheetAbsensi(targetBulan, targetTahun)`   | Membaca data dari `JAWABAN FORM`, membentuk matriks presensi bulanan (Selasa, Kamis, Sabtu), mengurutkan responden berdasarkan kehadiran, dan mengaplikasikan styling/formatting sheet   |
 | `buatTabelRangkumanDanGrafik(...)` | Membuat tabel helper rincian presensi per hari latihan di samping matriks utama dan membangkitkan Grouped Column Chart di bawahnya |
@@ -121,26 +121,23 @@ Kamu dari UKM / Tenkei?
 | **E** | Nama Member Tenkei | Nama warga Tenkei yang absen. |
 
 ## Struktur Data Tab Bulanan
-```text
-KOLOM       HEADER              KETERANGAN                            Formatting
-A           Nama Responden      nama yang absen                       Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-B-n         Hari, Tanggal       matriks kehadiran                     Baris 1: Hari, baris 2: Tanggal; bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-n+1         Total kehadiran                                           Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light cornflower blue 2" (#a4c2f4)
-n+2         Nama                nama yang absen +                     Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-                                di bawah ada grafik batang vertikal
-n+3         Selasa              total kehadiran pada hari selasa      Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-n+4         Kamis               total kehadiran pada hari kamis       Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-n+5         Sabtu               total kehadiran pada hari sabtu       Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-n+6         Total kehadiran                                           Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light cornflower blue 2" (#a4c2f4)
-```
+| Kolom | Header | Keterangan | Formatting |
+| :---: | :--- | :--- | :--- |
+| **A** | Nama Responden | Nama yang absen. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **B – n** | Hari, Tanggal | Matriks kehadiran. | Baris 1: Hari, baris 2: Tanggal; bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **n + 1** | Total kehadiran | Total kehadiran bulanan. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light cornflower blue 2" (`#a4c2f4`) |
+| **n + 2** | Nama | Nama yang absen (di bawahnya terdapat grafik batang vertikal). | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **n + 3** | Selasa | Total kehadiran pada hari Selasa. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **n + 4** | Kamis | Total kehadiran pada hari Kamis. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **n + 5** | Sabtu | Total kehadiran pada hari Sabtu. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **n + 6** | Total kehadiran | Total kehadiran per hari. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light cornflower blue 2" (`#a4c2f4`) |
 
 ## Struktur Data Tab RANGKUMAN KEHADIRAN
-```text
-KOLOM       HEADER              KETERANGAN                          Formatting
-A           Nama Responden      nama yang absen                     Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (#d9ead3)
-B-n         Tahun, Bulan        jumlah kehadiran di bulan tersebut  Baris 1: Tahun, baris 2: Bulan; bold, Arial, 10 pt, background baris 1 "light cornflower blue 2" (#a4c2f4), background baris 2 "light green 3" (#d9ead3)
-n+1         Total Kehadiran     total kehadiran akumulatif anggota  Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light cornflower blue 2" (#a4c2f4)
-```
+| Kolom | Header | Keterangan | Formatting |
+| :---: | :--- | :--- | :--- |
+| **A** | Nama Responden | Nama yang absen. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light green 3" (`#d9ead3`) |
+| **B – n** | Tahun, Bulan | Jumlah kehadiran di bulan tersebut. | Baris 1: Tahun, baris 2: Bulan; bold, Arial, 10 pt, background baris 1 "light cornflower blue 2" (`#a4c2f4`), background baris 2 "light green 3" (`#d9ead3`) |
+| **n + 1** | Total Kehadiran | Total kehadiran akumulatif anggota. | Baris 1 dan 2 merged header, bold, Arial, 10 pt, background "light cornflower blue 2" (`#a4c2f4`) |
 
 ---
 
@@ -168,31 +165,31 @@ Kamu dari UKM / Tenkei?
 ```
 * Perubahan struktur sumber data di tab `"JAWABAN FORM"`.  
 Previous version:
-```text
-KOLOM       HEADER         KETERANGAN
-A           Timestamp      sebagai acuan tanggal absensi
-B           Nama           nama yang absen
-```
-Current version: 
-```text
-KOLOM       HEADER                  KETERANGAN
-A           Timestamp               Acuan tanggal dan bulan absensi
-B           Nama (obsolete)         tidak digunakan lagi
-C           UKM / Tenkei            jawaban untuk pertanyaan pertama dari UKM atau Tenkei
-D           Nama Warga UKM          nama warga ukm yang absen
-E           Nama Member Tenkei      nama warga tenkei yang absen
-```
+
+| Kolom | Header | Keterangan |
+| :---: | :--- | :--- |
+| **A** | Timestamp | Sebagai acuan tanggal absensi. |
+| **B** | Nama | Nama yang absen. |
+
+Current version:
+
+| Kolom | Header | Keterangan |
+| :---: | :--- | :--- |
+| **A** | Timestamp | Acuan tanggal dan bulan absensi. |
+| **B** | Nama *(obsolete)* | Tidak digunakan lagi. |
+| **C** | UKM / Tenkei | Jawaban untuk pertanyaan pertama dari UKM atau Tenkei. |
+| **D** | Nama Warga UKM | Nama warga UKM yang absen. |
+| **E** | Nama Member Tenkei | Nama warga Tenkei yang absen. |
 
 ### Visualisasi Absen Gform **V3**    | 2 September 2026  
 * New Feature: `buatSheetRangkumanTahun()`  
 Meng-generate tab `"Rangkuman Kehadiran"` yang berisi rangkuman data kehadiran latihan tiap bulannya.  
-Struktur data tab-nya:
-```text
-KOLOM       HEADER              KETERANGAN
-A           Nama Responden      nama yang absen
-B-n         Tahun, Bulan        jumlah kehadiran di bulan tersebut.
-                                Baris 1: Tahun, baris 2: Bulan.
-```
+Struktur data tab-nya:  
+
+  | Kolom | Header | Keterangan |
+  | :---: | :--- | :--- |
+  | **A** | Nama Responden | Nama yang absen. |
+  | **B – n** | Tahun, Bulan | Jumlah kehadiran di bulan tersebut.<br>*(Baris 1: Tahun, Baris 2: Bulan)* |
 
 ### Visualisasi Absen Gform **V3.1**  | 2 September 2026  
 * New Feature: `aturUrutanTab()`  
@@ -203,13 +200,12 @@ B-n         Tahun, Bulan        jumlah kehadiran di bulan tersebut.
 * Perbaikan Fungsi: `buatSheetRangkumanTahun()`
   * Mengurutkan data kehadiran berdasarkan frekuensi kehadiran.
   * Menambahkan kolom `"Total Kehadiran"` di paling kanan header (n+1), sehingga strukturnya menjadi seperti berikut:
-```text
-KOLOM       HEADER              KETERANGAN
-A           Nama Responden      nama yang absen
-B-n         Tahun, Bulan        jumlah kehadiran di bulan tersebut.
-                                Baris 1: Tahun, baris 2: Bulan.
-n+1         Total Kehadiran     total kehadiran akumulatif anggota
-```
+
+| Kolom | Header | Keterangan |
+| :---: | :--- | :--- |
+| **A** | Nama Responden | Nama yang absen. |
+| **B – n** | Tahun, Bulan | Jumlah kehadiran di bulan tersebut (Baris 1: Tahun, baris 2: Bulan). |
+| **n + 1** | Total Kehadiran | Total kehadiran akumulatif anggota. |
 
 * Minor Patch:  
   - Perubahan nama tab `"Rangkuman Kehadiran"` menjadi `"RANGKUMAN KEHADIRAN"`  
@@ -217,12 +213,3 @@ n+1         Total Kehadiran     total kehadiran akumulatif anggota
   - Penambahan section `Version History` di `Readme.md`
   - Penambahan comment versi script di baris paling atas kode
   - Perubahan penulisan Readme.md yang semula menggunakan format plain text menjadi menggunakan tabel di bagian tertentu
-
-
-
- 
-  TODO:
-  - benerin ringkasan fungsi utama program
-  - commit tanggal 3
-  - ubah plain text format jadi tabel
-  - bikin fitur sort biar tinggal klik aja
